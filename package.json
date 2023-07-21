@@ -1,0 +1,8 @@
+{
+  "name": "ethglobal-paris-smart-cookies",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Phala-Network/ethglobal-paris-smart-cookies.git",
+  "author": "h4x3rotab <h4x3rotab@gmail.com>",
+  "license": "MIT"
+}
