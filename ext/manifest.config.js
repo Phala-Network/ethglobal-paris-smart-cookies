@@ -14,7 +14,13 @@ export default defineManifest(async (env) => {
     web_accessible_resources: [
       {
         "resources": ["src/assets/*"],
-        "matches": ["https://*.uniswap.org/*", "https://opensea.io/*", "https://coinmarketcap.com/*"],
+        "matches": [
+          "https://*.uniswap.org/*",
+          "https://opensea.io/*",
+          "https://coinmarketcap.com/*",
+          "https://lenster.xyz/*",
+          "https://*.lenster.xyz/*",
+        ],
       }
     ],
     // "action": { "default_popup": "src/popup/index.html" },
@@ -33,6 +39,10 @@ export default defineManifest(async (env) => {
       {
         "js": ["src/content-scripts/uniswap.js"],
         "matches": ["https://info.uniswap.org/*"]
+      },
+      {
+        "js": ["src/content-scripts/uniswap.js"],
+        "matches": ["https://app.uniswap.org/*"]
       },
       {
         "js": ["src/content-scripts/opensea.js"],
