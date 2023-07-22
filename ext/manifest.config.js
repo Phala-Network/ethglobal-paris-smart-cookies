@@ -23,7 +23,8 @@ export default defineManifest(async (env) => {
         ],
       }
     ],
-    // "action": { "default_popup": "src/popup/index.html" },
+    options_page: 'src/pages/options.html',
+    action: { "default_popup": "src/pages/popup.html" },
     host_permissions: [
       "https://lenster.xyz/*",
       "https://*.lenster.xyz/*",

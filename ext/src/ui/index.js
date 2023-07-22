@@ -51,6 +51,8 @@ export class LikeButton extends LitElement {
 
   async _onClick() {
     console.log('like button clicked:', this.dataset)
+    await sendMessage(this.dataset)
+    console.log('sent to extension')
   }
 }
 
