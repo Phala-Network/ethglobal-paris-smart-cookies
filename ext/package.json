@@ -1,0 +1,18 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^1.0.14",
+    "vite": "^2.9.15"
+  },
+  "dependencies": {
+    "@phala/sdk": "^0.5.0-nightly-20230711",
+    "ramda": "^0.29.0"
+  }
+}
