@@ -7,12 +7,13 @@ use pink_extension as pink;
 #[pink::contract(env=PinkEnvironment)]
 mod phat_hello {
     use super::pink;
-    use alloc::{format, string::String};
+    use alloc::{format, string::{String, ToString}};
     use pink::{http_get, PinkEnvironment};
     use scale::{Decode, Encode};
     use serde::Deserialize;
     // you have to use crates with `no_std` support in contract.
     use serde_json_core;
+    use pink_s3 as s3;
 
     #[derive(Debug, PartialEq, Eq, Encode, Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -47,30 +48,46 @@ mod phat_hello {
             Self { demo_field: true }
         }
 
-        /// A function to handle direct off-chain Query from users.
-        /// Such functions use the immutable reference `&self`
-        /// so WILL NOT change the contract state.
         #[ink(message)]
-        pub fn get_eth_balance(&self, account: String) -> Result<String> {
-            if !account.starts_with("0x") && account.len() != 42 {
-                return Err(Error::InvalidEthAddress);
+        pub fn update_profile(&self, account: String, data: String) -> Result<()> {
+            let s3 = connect_s3();
+            if data.len() == 0 {
+                return Ok(())
             }
-
-            // get account ETH balance with HTTP requests to Etherscan
-            // you can send any HTTP requests in Query handler
-            let resp = http_get!(format!(
-                "https://api.etherscan.io/api?module=account&action=balance&address={}",
-                account
-            ));
-            if resp.status_code != 200 {
-                return Err(Error::HttpRequestFailed);
-            }
-
-            let result: EtherscanResponse = serde_json_core::from_slice(&resp.body)
-                .or(Err(Error::InvalidResponseBody))?
-                .0;
-            Ok(String::from(result.result))
+            let bucket = "smartcookiesdemo";
+            let path = format!("profile/{account}.json");
+            s3.put(bucket, &path, data.as_bytes()).expect("failed to update");
+            Ok(())
         }
+
+        #[ink(message)]
+        pub fn get_profile(&self, account: String) -> Result<String> {
+            let s3 = connect_s3();
+            let bucket = "smartcookiesdemo";
+            let path = format!("profile/{account}.json");
+
+            let result = s3.get(bucket, &path);
+            if result == Err(s3::Error::RequestFailed(404)) {
+                return Ok("".to_string());
+            }
+            let str_result = String::from_utf8(result.expect("failed to get")).unwrap();
+            Ok(str_result)
+        }
+
+        #[ink(message)]
+        pub fn recommend(&self, account: String, recommend_type: String) -> Result<String> {
+            Ok("".to_string())
+        }
+    }
+
+    fn connect_s3() -> s3::S3<'static> {
+        let endpoint = "buckets.chainsafe.io";
+        let region = "us-east-1";
+        let access_key = "WPWLNJFYOTZJLFAKXCBN";
+        let secret_key = "";
+
+        s3::S3::new(endpoint, region, access_key, secret_key)
+            .expect("failed to connect to s3")
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
@@ -89,12 +106,21 @@ mod phat_hello {
             pink_extension_runtime::mock_ext::mock_all_ext();
 
             let phat_hello = PhatHello::new();
-            let account = String::from("0xD0fE316B9f01A3b5fd6790F88C2D53739F80B464");
-            let res = phat_hello.get_eth_balance(account.clone());
-            assert!(res.is_ok());
+            
+            let s3 = connect_s3();
+            let bucket = "smartcookiesdemo";
+            let object_key = "test.json";
+            let value = b"{}";
 
-            // run with `cargo +nightly test -- --nocapture` to see the following output
-            println!("Account {} gets {} Wei", account, res.unwrap());
+            s3.put(bucket, object_key, value).unwrap();
+
+            let head = s3.head(bucket, object_key).unwrap();
+            assert_eq!(head.content_length, value.len() as u64);
+
+            let v = s3.get(bucket, object_key).unwrap();
+            assert_eq!(v, value);
+
+            s3.delete(bucket, object_key).unwrap();
         }
     }
 }

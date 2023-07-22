@@ -108,6 +108,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "base16"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d27c3610c36aee21ce8ac510e6224498de4228ad772a171ed65643a24693a5a8"
+
+[[package]]
 name = "base58"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -793,6 +799,15 @@ checksum = "2a2a2320eb7ec0ebe8da8f744d7812d9fc4cb4d09344ac01898dbcb6a20ae69b"
 dependencies = [
  "crypto-mac 0.11.1",
  "digest 0.9.0",
+]
+
+[[package]]
+name = "hmac"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e"
+dependencies = [
+ "digest 0.10.7",
 ]
 
 [[package]]
@@ -1506,19 +1521,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b2a4787296e9989611394c33f193f676704af1686e70b8f8033ab5ba9a35a94"
 
 [[package]]
-name = "phat_hello"
-version = "0.1.0"
-dependencies = [
- "ink",
- "parity-scale-codec",
- "pink-extension",
- "pink-extension-runtime",
- "scale-info",
- "serde",
- "serde-json-core",
-]
-
-[[package]]
 name = "pin-project-lite"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1575,6 +1577,20 @@ dependencies = [
  "ring",
  "sp-core",
  "sp-runtime-interface",
+]
+
+[[package]]
+name = "pink-s3"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01d21098e0a4e14fc03316456e81fd28b72e035dee07f8d0e027139d9b7be060"
+dependencies = [
+ "base16",
+ "chrono",
+ "hmac 0.12.1",
+ "parity-scale-codec",
+ "pink-extension",
+ "sha2 0.10.6",
 ]
 
 [[package]]
@@ -2209,6 +2225,20 @@ name = "smallvec"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
+
+[[package]]
+name = "smart_cookies"
+version = "0.1.0"
+dependencies = [
+ "ink",
+ "parity-scale-codec",
+ "pink-extension",
+ "pink-extension-runtime",
+ "pink-s3",
+ "scale-info",
+ "serde",
+ "serde-json-core",
+]
 
 [[package]]
 name = "socket2"
