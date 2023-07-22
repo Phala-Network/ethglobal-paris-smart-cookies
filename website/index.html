@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Cookies</title>
+    <style>body { font-size: 75%; }</style>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/my-element.js"></script>
+  </head>
+  <body class="font-sans bg-gray-200 flex flex-row justify-center items-center h-screen w-screen">
+    <div class="w-[50vw] bg-white p-5 rounded-[28px] border-[5px] border-solid border-black">
+      <header class="flex flex-row justify-between items-center w-full">
+        <div class="flex flex-row gap-2 items-center">
+          <img src="/public/icon.png" class="h-10 w-10" />
+          <div class="text-md font-black leading-3">
+            <div>SMART</div>
+            <div>COOKIE</div>
+          </div>
+        </div>
+      </header>
+      <main>
+        <sc-connect></sc-connect>
+      </main>
+    </div>
+  </body>
+</html>

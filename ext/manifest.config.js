@@ -31,6 +31,7 @@ export default defineManifest(async (env) => {
       "https://*.uniswap.org/*",
       "https://opensea.io/*",
       "https://coinmarketcap.com/*",
+      "http://127.0.0.1:5173/*",
     ],
     permissions: ["storage", "unlimitedStorage", "activeTab", "scripting"],
     background: {
@@ -56,7 +57,11 @@ export default defineManifest(async (env) => {
       {
         "js": ["src/content-scripts/lenster.js"],
         "matches": ["https://lenster.xyz/*"]
-      }
+      },
+      {
+        "js": ["src/content-scripts/smart-cookies.js"],
+        "matches": ["http://127.0.0.1:5173/*"]
+      },
     ],
     content_security_policy: {
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"

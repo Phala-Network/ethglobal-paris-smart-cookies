@@ -29,6 +29,7 @@ export async function waitForElement(selector, tickMs = 500) {
   return hostAppRoot
 }
 
+
 export function listenEventTargetMatched(eventName, matcher, callback) {
   document.addEventListener(eventName, (ev) => {
     if (matcher(ev.target)) {

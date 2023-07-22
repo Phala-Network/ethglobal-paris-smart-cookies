@@ -29,7 +29,7 @@ let userAddress = 'test-addr-0xAddress'
 async function handlePayload(payload) {
   console.log('handlePayload()');
   // fetch old profile
-  const r = await contractPromise.query.getProfile(pair.address, { cert }, userAddress)
+  const r = await contractPromise.query.getProfile(cert.address, { cert }, userAddress)
   let profile;
   if (!r.output || !r.output.isOk) {
     console.log('error', r)
@@ -72,7 +72,7 @@ async function handlePayload(payload) {
   // commit
   const newProfile = JSON.stringify(profile)
   console.log('newProfile:', newProfile)
-  const r2 = await contractPromise.query.updateProfile(pair.address, { cert }, userAddress, newProfile);
+  const r2 = await contractPromise.query.updateProfile(cert.address, { cert }, userAddress, newProfile);
   if (!r2.output || !r2.output.isOk) {
     console.log('error2', r)
   } else {
@@ -81,12 +81,21 @@ async function handlePayload(payload) {
 }
 
 chrome.runtime.onMessage.addListener(async (payload, sender, sendResponse) => {
-  console.log('background:', payload)
+  if (payload.action === 'EIP1102walletConnected') {
+    userAddress = payload.data.address
+    return sendResponse('ok')
+  }
+  if (payload.action === 'CertificateSigned') {
+    // @FIXME wasm issue need to address, skip for demo
+    // cert = payload.data
+    return sendResponse('ok')
+  }
   if (contractPromise) {
     try {
       await handlePayload(payload)
     } catch (err) {
       console.log('handlePayload() failed:', err.message)
+      console.log(err)
     }
   }
   sendResponse('ok')
