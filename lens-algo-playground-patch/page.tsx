@@ -74,9 +74,9 @@ export default function Home() {
     setLoadingFeed(true)
     try {
       const account = await window.ethereum.send('eth_requestAccounts')
-      const address = 'test-addr-0xAddress'  // TODO: use a proper address from Metamask
+      // const address = 'test-addr-0xAddress'  // TODO: use a proper address from Metamask
 
-      // const address = account.result[0]
+      const address = account.result[0]
       // const profileResponse = await client.query({
       //   query: profilesByAddress,
       //   variables: {
@@ -152,7 +152,7 @@ export default function Home() {
              rounded-lg px-5 py-2 bg-slate-200
              ${view === 'personalized' ? 'text-black' : 'text-gray-400 '}
              `}
-          >Personalized</p>
+          >Super Personalized</p>
         </button>
       </div>
       {
@@ -268,7 +268,7 @@ export default function Home() {
                     />
                     <small className="ml-3">Suggested by: 
                       {publication.suggestedBy.map(tag => (
-                        <span className="inline-block rounded-lg bg-zinc-300 px-3 mx-2">{tag}</span>
+                        <span className="inline-block rounded-lg bg-zinc-300 px-3 mx-2" key={tag}>{tag}</span>
                       ))}
                     </small>
                   </div>
