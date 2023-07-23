@@ -7,6 +7,25 @@
     <title>Smart Cookie</title>
     <style>
     @import './options.css';
+    table {
+      border: 1px solid #747474;
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 24px;
+    }
+    th, td {
+      border: 1px solid #747474;
+      padding: 8px;
+      text-align: left;
+    }
+    td button {
+      border: 1px solid #747474;
+      border-radius: 4px;
+      padding: 4px;
+      background-color: #E6A027;
+      color: #000000;
+      font-weight: bold;
+    }
     </style>
   </head>
   <body class="font-sans bg-gray-200 flex flex-row justify-center items-center h-screen w-screen">
@@ -19,9 +38,12 @@
             <div>COOKIE</div>
           </div>
         </div>
-        <button class="rounded-4xl bg-[#E6A027] px-4 py-2 self-center text-md font-semibold text-neutral-800 border border-solid border-transparent transition-all hover:translate-y-0.5 hover:translate-x-0.5 hover:border-gray-800">
-          Connect
-        </button>
+        <div>
+          <button id="btn-connect" disabled class="rounded-4xl bg-[#E6A027] px-4 py-2 self-center text-md font-semibold text-neutral-800 border border-solid border-transparent transition-all hover:translate-y-0.5 hover:translate-x-0.5 hover:border-gray-800 disabled:opacity-50">
+            Connect
+          </button>
+          <span id="eth-addr"></span>
+        </div>
       </header>
       <main>
       </main>

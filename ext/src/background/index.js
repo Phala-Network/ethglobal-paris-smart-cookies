@@ -1,13 +1,20 @@
 import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'
+import { stringToHex } from '@polkadot/util'
 import { options, OnChainRegistry, signCertificate, PinkContractPromise } from '@phala/sdk'
 
 import * as abi from './abis/smart_cookies.json'
 
 const RPC_URL = 'wss://poc5.phala.network/ws'
 
-let apiPromise, phatRegistry, keyring, pair, cert, contractPromise
+let isReady = false
 
-(async function boot() {
+let apiPromise, phatRegistry, keyring, pair, cert, contractPromise, userAddress
+
+async function boot() {
+  chrome.storage.local.get(["evmAddress"]).then((data) => {
+    userAddress = data.evmAddress || ''
+  })
+
   apiPromise = await ApiPromise.create(options({
     provider: new WsProvider(RPC_URL),
     noInitWarn: true,
@@ -21,33 +28,46 @@ let apiPromise, phatRegistry, keyring, pair, cert, contractPromise
   const contractKey = await phatRegistry.getContractKeyOrFail(contractId)
   contractPromise = new PinkContractPromise(apiPromise, phatRegistry, abi, contractId, contractKey)
   console.log('boot finished:', contractPromise.address.toHuman());
-})();
 
-// TODO: get propoer address from Metamask
-let userAddress = 'test-addr-0xAddress'
+  isReady = true
+}
 
-async function handlePayload(payload) {
-  console.log('handlePayload()');
-  // fetch old profile
-  const r = await contractPromise.query.getProfile(cert.address, { cert }, userAddress)
+async function getProfile() {
+  console.log('getProfile()');
+  if (!contractPromise || !userAddress) {
+    console.log('not ready')
+    return {}
+  }
+  const r = await contractPromise.query.getProfile(cert.address, { cert }, stringToHex(userAddress))
   let profile;
   if (!r.output || !r.output.isOk) {
     console.log('error', r)
-    profile = {}
+    profile = {likes:[]}
   } else {
     const data = r.output.asOk.asOk
     profile = JSON.parse(data)
   }
+  console.log('returning', profile)
+  return profile
+}
 
-  /*
-  CMC:
-  {source: 'coinmarketcap', medium: 'home_page', tokenSymbol: 'BTC'}
-  {source: 'coinmarketcap', medium: 'detail_page', tokenSymbol: 'COMP', contractName: 'Ethereum', contractAddress: '0xc00e94cb662c3520282e6f5717214004a7f26888'}
-  Uniswap
-  */
+async function updateProfile(profile) {
+  const newProfile = JSON.stringify(profile)
+  console.log('newProfile:', newProfile)
+  const r2 = await contractPromise.query.updateProfile(cert.address, { cert }, stringToHex(userAddress), newProfile);
+  if (!r2.output || !r2.output.isOk) {
+    console.log('error2', r2)
+  } else {
+    console.log('setProfile()', r2.output.toJSON())
+  }
+}
+
+async function handlePayload(payload) {
+  console.log('handlePayload()', payload);
+  // fetch old profile
+  let profile = await getProfile()
 
   // update profile
-
   if (!profile.likes) {
     profile.likes = []
   }
@@ -70,34 +90,53 @@ async function handlePayload(payload) {
   }
 
   // commit
-  const newProfile = JSON.stringify(profile)
-  console.log('newProfile:', newProfile)
-  const r2 = await contractPromise.query.updateProfile(cert.address, { cert }, userAddress, newProfile);
-  if (!r2.output || !r2.output.isOk) {
-    console.log('error2', r)
-  } else {
-    console.log('setProfile()', r2.output.toJSON())
-  }
+  await updateProfile(profile)
 }
 
-chrome.runtime.onMessage.addListener(async (payload, sender, sendResponse) => {
-  if (payload.action === 'EIP1102walletConnected') {
-    userAddress = payload.data.address
-    return sendResponse('ok')
-  }
-  if (payload.action === 'CertificateSigned') {
-    // @FIXME wasm issue need to address, skip for demo
-    // cert = payload.data
-    return sendResponse('ok')
-  }
-  if (contractPromise) {
-    try {
-      await handlePayload(payload)
-    } catch (err) {
-      console.log('handlePayload() failed:', err.message)
-      console.log(err)
+chrome.runtime.onMessage.addListener((payload, sender, sendResponse) => {
+  (async () => {
+    while (!isReady) {
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
-  }
-  sendResponse('ok')
+
+    if (payload.action === 'EIP1102walletConnected') {
+      userAddress = payload.data.address
+      await chrome.storage.local.set({ evmAddress: userAddress })
+      sendResponse('ok')
+    }
+    else if (payload.action === 'CertificateSigned') {
+      // @FIXME wasm issue need to address, skip for demo
+      // cert = payload.data
+      sendResponse('ok')
+    }
+    else if (payload.action === 'GetCurrentEvmAddress') {
+      sendResponse({ address: userAddress || '' })
+    }
+    else if (payload.action == 'GetProfile') {
+      const p = await getProfile()
+      console.log('GetProfile() returns', p)
+      sendResponse(p)
+    }
+    else if (payload.action == 'UpdateProfile') {
+      await updateProfile(payload.profile)
+      sendResponse('ok')
+    }
+    else if (contractPromise) {
+      try {
+        await handlePayload(payload)
+      } catch (err) {
+        console.log('handlePayload() failed:', err.message)
+        console.log(err)
+      }
+      sendResponse('ok')
+    }
+  })();
+  return true
 })
 
+
+try {
+  boot()
+} catch (err) {
+  console.log('boot failed:', err)
+}

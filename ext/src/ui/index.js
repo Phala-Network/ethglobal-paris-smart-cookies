@@ -99,10 +99,11 @@ export class RecommendedPopup extends LitElement {
       }
 
       :host .popup {
-        padding: 10px 20px;
+        padding: 10px 20px 20px;
         border-radius: 28px;
         border: 5px solid #000;
         min-width: 640px;
+        background-color: #f2f5f9;
       }
 
       :host .popup-header {
@@ -119,6 +120,11 @@ export class RecommendedPopup extends LitElement {
 
       :host .sr-only {
         display: none;
+      }
+
+      :host main {
+        max-height: 65vh;
+        overflow-y: scroll;
       }
     `
   }
@@ -157,6 +163,110 @@ export class RecommendedPopup extends LitElement {
 }
 
 
+export class RecommendCard extends LitElement {
+  static get styles() {
+    return css`
+      :host article {
+        border: 1px solid #e1e5ea;
+        border-radius: 28px;
+        padding: 18px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: #1e2022;
+      }
+
+      :host article header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+
+      :host article header img {
+        border-radius: 100%;
+        width: 32px;
+        height: 32px;
+      }
+
+      :host article header div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        line-height: 1rem;
+      }
+
+      :host article header div h4 {
+        margin: 0;
+      }
+
+      :host article header div span {
+        font-size: 12px;
+        color: #989898
+      }
+
+      :host footer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        color: #989898;
+      }
+
+      :host footer strong {
+        color: #1e2022;
+      }
+    `
+  }
+
+  static get properties() {
+    return {
+      pic: { type: String },
+      name: { type: String },
+      text: { type: String },
+      createdAt: { type: String },
+      totalAmountOfCollects: { type: Number },
+      totalAmountOfMirrors: { type: Number },
+      totalAmountOfComments: { type: Number },
+    }
+  }
+
+  constructor() {
+    super()
+  }
+
+  render() {
+    const relativeTime = new Intl.RelativeTimeFormat('en', { style: 'narrow' })
+    const createdAt = new Date(this.createdAt)
+    const diff = Math.round((new Date() - createdAt) / 1000 / 60 / 60 / 24)
+    const timeAgo = relativeTime.format(-diff, 'day')
+    const formmatted = `${timeAgo} ago`
+    return html`
+      <article>
+        <header>
+          <img src=${this.pic} />
+          <div>
+            <h4>${this.name}</h4>
+            <span>${formmatted}</span>
+          </div>
+        </header>
+        <main>
+          <p>${this.text}</p>
+        </main>
+        <footer>
+          <span><strong>${this.totalAmountOfCollects}</strong> collects</span>
+          <span><strong>${this.totalAmountOfMirrors}</strong> mirrors</span>
+          <span><strong>${this.totalAmountOfComments}</strong> comments</span>
+        </footer>
+      </article>
+    `
+  }
+}
+
+
 window.customElements.define('sc-like-button', LikeButton)
 window.customElements.define('sc-recommended-popup', RecommendedPopup)
+window.customElements.define('sc-recommend-card', RecommendCard)
 console.log('all customElements registered')
+

@@ -31,7 +31,8 @@ export default defineManifest(async (env) => {
       "https://*.uniswap.org/*",
       "https://opensea.io/*",
       "https://coinmarketcap.com/*",
-      "http://127.0.0.1:5173/*",
+      // "http://127.0.0.1:5173/*",
+      "https://browser-extension-with-phat-contract.vercel.app/*",
     ],
     permissions: ["storage", "unlimitedStorage", "activeTab", "scripting"],
     background: {
@@ -60,7 +61,10 @@ export default defineManifest(async (env) => {
       },
       {
         "js": ["src/content-scripts/smart-cookies.js"],
-        "matches": ["http://127.0.0.1:5173/*"]
+        "matches": [
+          // "http://127.0.0.1:5173/*",
+          "https://browser-extension-with-phat-contract.vercel.app/*",
+        ]
       },
     ],
     content_security_policy: {
