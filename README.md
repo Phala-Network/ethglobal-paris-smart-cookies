@@ -19,3 +19,13 @@ Smart Cookie elevates your online journey by delivering Web3 social posts (Lens)
         - You can choose close cookies or AI recommendation push
         - You can crash cookies if you want! With that, all historic cookies will be deleted.
         - You can switch AI models, like from OpenAI to Llama (only OpenAI in the demo)
+
+## Code structure
+
+- ext: Chrome extension to collect likes and inject suggestions
+- phat: Phat Contract to build the "glue" layer between the decentralized services
+- recommend: A Flask app to serve the recommendataion requests. Will be fully migrated to Phat Contract in the future.
+- lens-algo-playground-patch: The patch code to integrate the recommendation service to Lens Algo Playground
+- scripts: Pre-processing scripts to build the vectorized database
+- website: The simple frontend to connect to Metamask
+
