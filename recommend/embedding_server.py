@@ -443,17 +443,21 @@ def lens_search(query):
     items = result['data']['search']['items']
     return [(i['id'], i['metadata']['content'], i) for i in items]
 
-def recommend(address):
-    print(f'recommend({address})')
-    # fetch user likes and create user embedding
+def get_user_profile(address):
     resp = s3.get_object(
         Bucket='smartcookiesdemo',
         Key=f'profile/{address}.json')
     data = resp['Body'].read()
     print('retrived from s3:', data)
-    profile = json.loads(data)
+    return json.loads(data)
 
-    descs = [desc_token(item['tokenSymbol']) for item in profile['likes'] if item['medium'] == 'token']
+def recommend(address):
+    print(f'recommend({address})')
+    # fetch user likes and create user embedding
+    profile = get_user_profile(address)
+
+    descs = [desc_token(item['tokenSymbol']) for item in profile['likes'] if 'tokenSymbol' in item]
+    print('desc_tokens:', descs)
     embeddings = np.array(map_embedding(descs))
 
     # match tags
@@ -486,8 +490,10 @@ def recommend(address):
         resp = search_response[ids[text_id]]
         suggestedBy = related_tags[ids[text_id]]
         pic = None
-        if resp['profile']['picture']:
+        try:
             pic = resp['profile']['picture']['original']['url']
+        except:
+            print('missing picture') # , resp['profile']
         return {
             'score': score, 
             'textId': text_id,
@@ -509,6 +515,35 @@ def recommend(address):
 
 # recommend('test-addr-0xAddress')
 
+# ---- token recommendation ----
+
+import json
+with open('tmp/data/uniswap-default.json', 'r') as fin:
+    uni_default = json.load(fin)['tokens']
+
+for obj in uni_default:
+    keywords = [obj['name'], obj['symbol']]
+    if obj['address']:
+        keywords.append(obj['address'])
+    keywords = [i.lower() for i in keywords]
+    obj['keywords'] = keywords
+
+def map_uni_token(token):
+    token = token.lower()
+    found = None
+    for crypto in uni_default:
+        if token in crypto['keywords']:
+            found = crypto
+            break
+    return found
+
+def uni_recommend(address):
+    profile = get_user_profile(address)
+    uni_items = [map_uni_token(item['tokenSymbol']) for item in profile['likes'] if 'tokenSymbol' in item]
+    uni_items = [i for i in uni_items if i]
+    print('uni_recommend:', uni_items)
+    return uni_items
+
 app = Flask(__name__)
 CORS(app)
 
@@ -519,6 +554,10 @@ def hello_world():
 @app.route("/feed/<addr>")
 def feed(addr):
     return jsonify(recommend(addr))
+
+@app.route("/uni/<addr>")
+def uni(addr):
+    return jsonify(uni_recommend(addr))
 
 if __name__=='__main__':
     app.run(debug=True)
