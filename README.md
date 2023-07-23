@@ -1,4 +1,5 @@
 # ethglobal-paris-smart-cookies
+
 ![Media Kit](https://github.com/Phala-Network/ethglobal-paris-smart-cookies/assets/57211675/02e6f4a3-7fe6-477e-b4aa-a7841239c768)
 
 ## Introduction
